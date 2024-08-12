@@ -1,26 +1,28 @@
-# Use the official Node.js image
-FROM node:18
+FROM node:14
 
-# Set the working directory
-WORKDIR /usr/src/app
+# Install Puppeteer dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    ca-certificates \
+    libnss3 \
+    libgdk-pixbuf2.0-0 \
+    libatk-bridge2.0-0 \
+    libx11-xcb1 \
+    libxcb-dri3-0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libxshmfence1 \
+    libxtst6 \
+    libnss3 \
+    libgconf-2-4
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Install Puppeteer
+RUN npm install puppeteer
 
-# Install dependencies
+# Your app setup
+COPY . /app
+WORKDIR /app
 RUN npm install
-
-# Copy the rest of the application code
-COPY . .
-
-# Install ngrok globally
-#RUN npm install -g ngrok
-
-# Set the ngrok auth token
-#RUN ngrok config add-authtoken 2kVig7mAohx5kdCIWmlrdf0UOAC_2y1dsr28t4BE8VSQkLvbF
-
-# Expose the application port
-EXPOSE 3000
-
-# Start the application
 CMD ["node", "server.mjs"]
