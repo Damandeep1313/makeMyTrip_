@@ -14,10 +14,10 @@ RUN npm install
 COPY . .
 
 # Install ngrok globally
-RUN npm install -g ngrok
+#RUN npm install -g ngrok
 
 # Set the ngrok auth token
-RUN ngrok config add-authtoken 2kVig7mAohx5kdCIWmlrdf0UOAC_2y1dsr28t4BE8VSQkLvbF
+#RUN ngrok config add-authtoken 2kVig7mAohx5kdCIWmlrdf0UOAC_2y1dsr28t4BE8VSQkLvbF
 
 # Expose the application port
 EXPOSE 3000
