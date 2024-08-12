@@ -15,7 +15,7 @@ app.get('/healthCheck', async (req, res) => {
 app.get('/scrape', async (req, res) => {
   try {
     // Launch Puppeteer
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     await page.goto('https://www.makemytrip.com/hotels-international/united_arab_emirates/abu_dhabi-hotels/');
     
