@@ -5,6 +5,12 @@ import puppeteer from 'puppeteer';
 const app = express();
 const port = 3000; // You can choose any port you prefer
 
+app.get('/healthCheck', async (req, res) => {
+  return res.json({message:"server working fine"});
+});
+  
+
+
 // Endpoint to run the Puppeteer script
 app.get('/scrape', async (req, res) => {
   try {
