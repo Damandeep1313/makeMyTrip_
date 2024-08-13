@@ -140,8 +140,9 @@ app.get('/scrape', async (req, res) => {
 
     console.log("CVV 621 entered.");
 
-
-
+    //click on pay now
+    await newPage.waitForSelector('.prime__btn');
+    await newPage.click('.prime__btn');
 
 
 
