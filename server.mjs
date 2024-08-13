@@ -1,35 +1,24 @@
-// server.js
 import express from 'express';
 import puppeteer from 'puppeteer';
 
 const app = express();
 const port = 3000; // You can choose any port you prefer
 
-app.get('/healthCheck', async (req, res) => {
-  return res.json({message:"server working fine"});
-});
-  
-
-
-// Endpoint to run the Puppeteer script
 app.get('/scrape', async (req, res) => {
   try {
-    // Launch Puppeteer
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto('https://www.makemytrip.com/hotels-international/united_arab_emirates/abu_dhabi-hotels/');
     
-    // Click on the first hotel
     await page.waitForSelector('#Listing_hotel_0');
     const pagesBeforeClick = await browser.pages();
     await page.click('#Listing_hotel_0');
-    
-    // Wait for the new tab to open
+
     const newPage = await new Promise(resolve => {
       browser.once('targetcreated', async target => {
         const newPages = await browser.pages();
-        const tab = newPages.find(p => !pagesBeforeClick.includes(p));
-        resolve(tab);
+        const newTab = newPages.find(p => !pagesBeforeClick.includes(p));
+        resolve(newTab);
       });
     });
 
@@ -37,19 +26,26 @@ app.get('/scrape', async (req, res) => {
     await newPage.screenshot({ path: 'hotel_clicked.png', fullPage: true });
     console.log("Navigation to new tab successful.");
 
-    // Click on the search button
+    // (Optional) Interacting with check-in and check-out dates
+    // Uncomment if needed, adjust selectors and dates
+    // await newPage.waitForSelector('.DayPicker-Day[aria-label="Mon Aug 12 2024"]');
+    // await newPage.click('.DayPicker-Day[aria-label="Mon Aug 12 2024"]');
+    // await newPage.waitForSelector('.DayPicker-Day[aria-label="Tue Aug 13 2024"]');
+    // await newPage.click('.DayPicker-Day[aria-label="Tue Aug 13 2024"]');
+    // await newPage.screenshot({ path: 'dates_selected.png', fullPage: true });
+    // await newPage.click('.rmsGst__footer .primaryBtn.btnApplyNew');
+    // await newPage.screenshot({ path: 'after_clicking_apply_button.png', fullPage: true });
+
     await newPage.waitForSelector('#hsw_search_button');
     await newPage.click('#hsw_search_button');
     console.log("Search button clicked.");
     await newPage.screenshot({ path: 'after_clicking_search_button.png', fullPage: true });
 
-    // Click the "BOOK THIS NOW" button
     await newPage.waitForSelector('.bkngOption__cta');
     await newPage.click('.bkngOption__cta');
     console.log("BOOK THIS NOW button clicked.");
     await newPage.screenshot({ path: 'book_now_clicked.png', fullPage: true });
 
-    // Fill in the form details
     await newPage.waitForSelector('#fName');
     await newPage.waitForSelector('#lName');
     await newPage.type('#fName', 'Damandeep', { delay: 100 });
@@ -59,16 +55,19 @@ app.get('/scrape', async (req, res) => {
     console.log("Form details entered.");
     await newPage.screenshot({ path: 'form_filled.png', fullPage: true });
 
-    // Click the checkbox
     await newPage.click('.checkboxWithLblWpr__label');
-
-    // Click the "Pay Now" button
     await newPage.waitForSelector('.btnContinuePayment.primaryBtn.capText', { visible: true });
-    await newPage.click('.btnContinuePayment.primaryBtn.capText');
-    console.log("Pay Now button clicked.");
+    console.log("Pay Now button is visible.");
+
+    try {
+      await newPage.click('.btnContinuePayment.primaryBtn.capText');
+      console.log("Pay Now button clicked.");
+    } catch (error) {
+      console.error("Failed to click the Pay Now button:", error);
+    }
+
     await newPage.screenshot({ path: 'pay_now_clicked.png', fullPage: true });
 
-    // Handle PAN card details and payment options
     await newPage.waitForSelector('.btnContinuePayment');
     await Promise.all([
       newPage.click('.btnContinuePayment'),
@@ -101,18 +100,24 @@ app.get('/scrape', async (req, res) => {
     console.log("UPI Option clicked.");
     await newPage.screenshot({ path: 'upi_option_clicked.png', fullPage: true });
 
-    // Send a response indicating success
-    res.status(200).send('Scraping and booking completed successfully.');
+    // (Optional) Interact with UPI field
+    // Uncomment if needed, adjust selectors and values
+     await newPage.waitForSelector('#inputVpa');
+     await newPage.type('#inputVpa', '8307039599315@paytm', { delay: 100 });
+     await newPage.waitForSelector('.prime__btn.paynow__btn');
+     await newPage.click('.prime__btn.paynow__btn');
 
-    // Close the browser
-    await browser.close();
+     console.log("Payment Request Sent.");
+
+    res.status(200).send("Scraping and booking completed successfully.");
+    // Optionally close the browser
+    // await browser.close();
   } catch (error) {
     console.error("Error during scraping and booking:", error);
-    res.status(500).send('An error occurred during scraping and booking.');
+    res.status(500).send("An error occurred during scraping and booking.");
   }
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
