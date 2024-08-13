@@ -95,19 +95,61 @@ app.get('/scrape', async (req, res) => {
     console.log("Yes, Add 20% TCS clicked.");
     await newPage.screenshot({ path: 'tcs_added.png', fullPage: true });
 
-    await newPage.waitForSelector('.payment__options__tab');
-    await newPage.click('.payment__options__tab ul li.box-padding.paymode-item:first-child');
-    console.log("UPI Option clicked.");
-    await newPage.screenshot({ path: 'upi_option_clicked.png', fullPage: true });
+    //await newPage.waitForSelector('.payment__options__tab');
+    //await newPage.click('.payment__options__tab ul li.box-padding.paymode-item:first-child');
+    //console.log("UPI Option clicked.");
+    //await newPage.screenshot({ path: 'upi_option_clicked.png', fullPage: true });
 
     // (Optional) Interact with UPI field
     // Uncomment if needed, adjust selectors and values
-     await newPage.waitForSelector('#inputVpa');
-     await newPage.type('#inputVpa', '8307039599315@paytm', { delay: 100 });
-     await newPage.waitForSelector('.prime__btn.paynow__btn');
-     await newPage.click('.prime__btn.paynow__btn');
+    //  await newPage.waitForSelector('#inputVpa');
+    //  await newPage.type('#inputVpa', '8307039599315@paytm', { delay: 100 });
+    //  await newPage.waitForSelector('.prime__btn.paynow__btn');
+    //  await newPage.click('.prime__btn.paynow__btn');
 
-     console.log("Payment Request Sent.");
+    //credit card--------->>>>
+    await newPage.waitForSelector('.payment__options__tab');
+    await newPage.click('.payment__options__tab ul li.box-padding.paymode-item:nth-child(2)'); // Selects the second payment option
+    console.log("Credit/Debit/ATM Card Option clicked.");
+    await newPage.screenshot({ path: 'upi_option_clicked.png', fullPage: true });
+
+    await newPage.waitForSelector('#cardNumber');
+    await newPage.type('#cardNumber', '6521660115829663', { delay: 100 }); // Types in the card number
+
+    await newPage.waitForSelector('#nameOnCard');
+    await newPage.type('#nameOnCard', 'DAMANDEEP SINGH', { delay: 100 }); // Types in the name on the card
+
+    // Wait for the month dropdown to be available
+    await newPage.waitForSelector('select[name="expiryMonth"]');
+    // Select December (12) from the dropdown
+    await newPage.select('select[name="expiryMonth"]', 'December (12)');
+    console.log("December (12) selected.");
+
+
+    // Wait for the year dropdown to be available
+    await newPage.waitForSelector('select[name="Year"]');
+    // Select 2026 from the dropdown
+    await newPage.select('select[name="Year"]', '2026');
+    console.log("Year 2026 selected.");
+
+    // Wait for the CVV input field to be available
+    await newPage.waitForSelector('#cardCvv');
+
+    // Type the CVV '621' into the input field
+    await newPage.type('#cardCvv', '621', { delay: 100 });
+
+    console.log("CVV 621 entered.");
+
+
+
+
+
+
+
+    console.log("Payment Request Sent.");
+
+
+
 
     res.status(200).send("Scraping and booking completed successfully.");
     // Optionally close the browser
