@@ -5,6 +5,23 @@ const app = express();
 const port = 3000; // You can choose any port you prefer
 
 app.get('/scrape', async (req, res) => {
+  const {
+    firstName,
+    lastName,
+    email,
+    mobile,
+    panNumber,
+    cardNumber,
+    nameOnCard,
+    expiryMonth,
+    expiryYear,
+    cvv
+  } = req.query;
+
+  if (!firstName || !lastName || !email || !mobile || !panNumber || !cardNumber || !nameOnCard || !expiryMonth || !expiryYear || !cvv) {
+    return res.status(400).send("Missing required query parameters.");
+  }
+
   try {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
@@ -26,16 +43,6 @@ app.get('/scrape', async (req, res) => {
     await newPage.screenshot({ path: 'hotel_clicked.png', fullPage: true });
     console.log("Navigation to new tab successful.");
 
-    // (Optional) Interacting with check-in and check-out dates
-    // Uncomment if needed, adjust selectors and dates
-    // await newPage.waitForSelector('.DayPicker-Day[aria-label="Mon Aug 12 2024"]');
-    // await newPage.click('.DayPicker-Day[aria-label="Mon Aug 12 2024"]');
-    // await newPage.waitForSelector('.DayPicker-Day[aria-label="Tue Aug 13 2024"]');
-    // await newPage.click('.DayPicker-Day[aria-label="Tue Aug 13 2024"]');
-    // await newPage.screenshot({ path: 'dates_selected.png', fullPage: true });
-    // await newPage.click('.rmsGst__footer .primaryBtn.btnApplyNew');
-    // await newPage.screenshot({ path: 'after_clicking_apply_button.png', fullPage: true });
-
     await newPage.waitForSelector('#hsw_search_button');
     await newPage.click('#hsw_search_button');
     console.log("Search button clicked.");
@@ -48,10 +55,10 @@ app.get('/scrape', async (req, res) => {
 
     await newPage.waitForSelector('#fName');
     await newPage.waitForSelector('#lName');
-    await newPage.type('#fName', 'Damandeep', { delay: 100 });
-    await newPage.type('#lName', 'Singh', { delay: 200 });
-    await newPage.type('#email', 'damandeepsingh24090@gmail.com', { delay: 100 });
-    await newPage.type('#mNo', '8307039599', { delay: 100 });
+    await newPage.type('#fName', firstName, { delay: 100 });
+    await newPage.type('#lName', lastName, { delay: 200 });
+    await newPage.type('#email', email, { delay: 100 });
+    await newPage.type('#mNo', mobile, { delay: 100 });
     console.log("Form details entered.");
     await newPage.screenshot({ path: 'form_filled.png', fullPage: true });
 
@@ -75,7 +82,7 @@ app.get('/scrape', async (req, res) => {
     ]);
 
     await newPage.waitForSelector('.tcsPanInputField', { visible: true });
-    await newPage.type('.tcsPanInputField', 'OFRPS7700R', { delay: 100 });
+    await newPage.type('.tcsPanInputField', panNumber, { delay: 100 });
     console.log("PAN number entered.");
 
     await newPage.evaluate(() => {
@@ -95,66 +102,36 @@ app.get('/scrape', async (req, res) => {
     console.log("Yes, Add 20% TCS clicked.");
     await newPage.screenshot({ path: 'tcs_added.png', fullPage: true });
 
-    //await newPage.waitForSelector('.payment__options__tab');
-    //await newPage.click('.payment__options__tab ul li.box-padding.paymode-item:first-child');
-    //console.log("UPI Option clicked.");
-    //await newPage.screenshot({ path: 'upi_option_clicked.png', fullPage: true });
-
-    // (Optional) Interact with UPI field
-    // Uncomment if needed, adjust selectors and values
-    //  await newPage.waitForSelector('#inputVpa');
-    //  await newPage.type('#inputVpa', '8307039599315@paytm', { delay: 100 });
-    //  await newPage.waitForSelector('.prime__btn.paynow__btn');
-    //  await newPage.click('.prime__btn.paynow__btn');
-
-    //credit card--------->>>>
+    // Click on the Credit/Debit/ATM Card Option
     await newPage.waitForSelector('.payment__options__tab');
-    await newPage.click('.payment__options__tab ul li.box-padding.paymode-item:nth-child(2)'); // Selects the second payment option
+    await newPage.click('.payment__options__tab ul li.box-padding.paymode-item:nth-child(2)');
     console.log("Credit/Debit/ATM Card Option clicked.");
-    await newPage.screenshot({ path: 'upi_option_clicked.png', fullPage: true });
+    await newPage.screenshot({ path: 'card_option_clicked.png', fullPage: true });
 
     await newPage.waitForSelector('#cardNumber');
-    await newPage.type('#cardNumber', '6521660115829663', { delay: 100 }); // Types in the card number
+    await newPage.type('#cardNumber', cardNumber, { delay: 100 });
 
     await newPage.waitForSelector('#nameOnCard');
-    await newPage.type('#nameOnCard', 'DAMANDEEP SINGH', { delay: 100 }); // Types in the name on the card
+    await newPage.type('#nameOnCard', nameOnCard, { delay: 100 });
 
-    // Wait for the month dropdown to be available
     await newPage.waitForSelector('select[name="expiryMonth"]');
-    // Select December (12) from the dropdown
-    await newPage.select('select[name="expiryMonth"]', 'December (12)');
-    console.log("December (12) selected.");
+    await newPage.select('select[name="expiryMonth"]', expiryMonth);
+    console.log(`${expiryMonth} selected.`);
 
-
-    // Wait for the year dropdown to be available
     await newPage.waitForSelector('select[name="Year"]');
-    // Select 2026 from the dropdown
-    await newPage.select('select[name="Year"]', '2026');
-    console.log("Year 2026 selected.");
+    await newPage.select('select[name="Year"]', expiryYear);
+    console.log(`Year ${expiryYear} selected.`);
 
-    // Wait for the CVV input field to be available
     await newPage.waitForSelector('#cardCvv');
+    await newPage.type('#cardCvv', cvv, { delay: 100 });
+    console.log(`CVV ${cvv} entered.`);
 
-    // Type the CVV '621' into the input field
-    await newPage.type('#cardCvv', '621', { delay: 100 });
-
-    console.log("CVV 621 entered.");
-
-    //click on pay now
     await newPage.waitForSelector('.prime__btn');
     await newPage.click('.prime__btn');
 
-
-
-
     console.log("Payment Request Sent.");
 
-
-
-
     res.status(200).send("Scraping and booking completed successfully.");
-    // Optionally close the browser
-    // await browser.close();
   } catch (error) {
     console.error("Error during scraping and booking:", error);
     res.status(500).send("An error occurred during scraping and booking.");
