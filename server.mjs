@@ -25,7 +25,7 @@ app.get('/scrape', async (req, res) => {
   try {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
-    await page.goto('https://www.makemytrip.com/hotels-international/united_arab_emirates/abu_dhabi-hotels/');
+    await page.goto('https://www.makemytrip.com/hotels-international/united_arab_emirates/abu_dhabi-hotels/', { waitUntil: 'networkidle2', timeout: 60000 });
     
     await page.waitForSelector('#Listing_hotel_0');
     const pagesBeforeClick = await browser.pages();
