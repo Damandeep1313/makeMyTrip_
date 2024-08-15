@@ -23,7 +23,13 @@ app.get('/scrape', async (req, res) => {
   }
 
   try {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({
+      headless: false, // Show the browser UI
+      executablePath: '/usr/bin/chromium-browser', // Path to Chromium
+      args: ['--no-sandbox', '--disable-gpu', '--disable-http2'] // Additional arguments
+    });
+    
+    
     const page = await browser.newPage();
     await page.goto('https://www.makemytrip.com/hotels-international/united_arab_emirates/abu_dhabi-hotels/', { waitUntil: 'networkidle2', timeout: 60000 });
     
